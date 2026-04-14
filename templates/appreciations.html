@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Appreciations - TogetherOS{% endblock %}
+
+{% block content %}
+<div class="mt-2">
+    <h2>💕 Appreciations</h2>
+    
+    <!-- Send New Appreciation -->
+    <div class="card">
+        <h3>Stuur een Appreciation</h3>
+        <form method="POST">
+            <div class="form-group">
+                <label>Type</label>
+                <select name="category" required>
+                    <option value="compliment">💝 Compliment</option>
+                    <option value="gratitude">🙏 Dankbaarheid</option>
+                    <option value="love_note">❤️ Love Note</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label>Bericht</label>
+                <textarea name="message" required placeholder="Schrijf iets liefs..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Verzenden</button>
+        </form>
+    </div>
+    
+    <!-- Received Appreciations -->
+    <div class="card mt-2">
+        <h3>📥 Ontvangen</h3>
+        {% if received|length > 0 %}
+            {% for appr in received %}
+            <div style="padding: 1rem; background: rgba(255, 107, 157, 0.1); border-radius: 12px; margin-bottom: 0.75rem; border-left: 3px solid var(--primary);">
+                <div style="display: flex; justify-content: space-between; align-items: start;">
+                    <div>
+                        <span style="font-size: 1.5rem;">
+                            {% if appr['category'] == 'compliment' %}💝
+                            {% elif appr['category'] == 'gratitude' %}🙏
+                            {% else %}❤️{% endif %}
+                        </span>
+                    </div>
+                    <p class="text-secondary" style="font-size: 0.8rem;">{{ appr['created_at'][:10] }}</p>
+                </div>
+                <p style="margin-top: 0.5rem;">{{ appr['message'] }}</p>
+                <p class="text-secondary" style="font-size: 0.9rem; margin-top: 0.5rem;">Van: {{ appr['from_name'] }}</p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-secondary">Nog geen appreciations ontvangen.</p>
+        {% endif %}
+    </div>
+    
+    <!-- Sent Appreciations -->
+    <div class="card mt-2">
+        <h3>📤 Verzonden</h3>
+        {% if sent|length > 0 %}
+            {% for appr in sent %}
+            <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
+                <p style="font-size: 0.9rem;">{{ appr['message'] }}</p>
+                <p class="text-secondary" style="font-size: 0.8rem; margin-top: 0.25rem;">
+                    {{ appr['created_at'][:10] }}
+                </p>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-secondary">Nog geen appreciations verzonden.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Registreren - TogetherOS{% endblock %}
+
+{% block content %}
+<div style="max-width: 400px; margin: 2rem auto;">
+    <div class="card">
+        <h2 class="text-center">💕 Welkom bij TogetherOS</h2>
+        <p class="text-secondary text-center mb-3">Start jullie reis samen</p>
+        
+        <form method="POST">
+            <div class="form-group">
+                <label for="name">Naam</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="password">Wachtwoord</label>
+                <input type="password" id="password" name="password" required minlength="6">
+            </div>
+            
+            <div class="form-group">
+                <label for="invite_code">Partner Invite Code (optioneel)</label>
+                <input type="text" id="invite_code" name="invite_code" placeholder="Laat leeg als je later koppelt">
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Account Aanmaken</button>
+        </form>
+        
+        <p class="text-center mt-3 text-secondary">
+            Al een account? <a href="/login" style="color: var(--primary);">Log in</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

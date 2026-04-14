@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Memories - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>💭 Memory Vault</h2>
+    
+    <div class="card">
+        <h3>Nieuwe Memory</h3>
+        <form method="POST">
+            <div class="form-group">
+                <label>Titel</label>
+                <input type="text" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>Beschrijving</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Datum</label>
+                <input type="date" name="date">
+            </div>
+            <div class="form-group">
+                <label>Tags (komma gescheiden)</label>
+                <input type="text" name="tags" placeholder="vakantie, verjaardag, special">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Opslaan</button>
+        </form>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Jullie Memories</h3>
+        {% for memory in memories %}
+        <div style="padding: 1rem; background: rgba(255, 107, 157, 0.1); border-radius: 12px; margin-bottom: 0.75rem;">
+            <p><strong>{{ memory['title'] }}</strong></p>
+            <p class="text-secondary" style="font-size: 0.9rem;">{{ memory['date'] }}</p>
+            <p style="margin-top: 0.5rem;">{{ memory['description'] }}</p>
+            {% if memory['tags'] %}
+            <p style="font-size: 0.8rem; margin-top: 0.5rem; color: var(--accent);">🏷️ {{ memory['tags'] }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

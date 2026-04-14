@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Instellingen - TogetherOS{% endblock %}
+
+{% block content %}
+<div class="mt-2">
+    <h2>⚙️ Instellingen</h2>
+    
+    <!-- Partner Section -->
+    <div class="card mt-3">
+        <h3>👥 Partner Koppeling</h3>
+        
+        {% if partner %}
+        <div style="padding: 1rem; background: rgba(0, 217, 163, 0.1); border-radius: 8px; border: 1px solid var(--success);">
+            <p><strong>Gekoppeld met:</strong> {{ partner['name'] }}</p>
+            <p class="text-secondary" style="font-size: 0.9rem;">{{ partner['email'] }}</p>
+            
+            <form method="POST" style="margin-top: 1rem;" onsubmit="return confirm('Weet je zeker dat je wilt ontkoppelen?');">
+                <input type="hidden" name="action" value="unlink_partner">
+                <button type="submit" class="btn btn-danger">Partner Ontkoppelen</button>
+            </form>
+        </div>
+        {% else %}
+        <p class="text-secondary">Je hebt nog geen partner gekoppeld.</p>
+        
+        <!-- Generate Invite Code -->
+        <form method="POST" class="mt-2">
+            <input type="hidden" name="action" value="generate_invite">
+            <button type="submit" class="btn btn-primary">Genereer Invite Code</button>
+        </form>
+        
+        <!-- Active Invite Codes -->
+        {% if invites|length > 0 %}
+        <div class="mt-3">
+            <h4 style="font-size: 1rem; color: var(--text-secondary);">Actieve Invite Codes:</h4>
+            {% for invite in invites %}
+            <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-top: 0.5rem;">
+                <code style="font-size: 1.2rem; color: var(--primary);">{{ invite['invite_code'] }}</code>
+                <p class="text-secondary" style="font-size: 0.8rem; margin-top: 0.25rem;">
+                    Aangemaakt: {{ invite['created_at'] }}
+                </p>
+            </div>
+            {% endfor %}
+            <p class="text-secondary mt-2" style="font-size: 0.9rem;">
+                Deel deze code met je partner zodat ze kunnen registreren en automatisch gekoppeld worden.
+            </p>
+        </div>
+        {% endif %}
+        {% endif %}
+    </div>
+    
+    <!-- Profile Settings -->
+    <div class="card mt-2">
+        <h3>👤 Profiel Instellingen</h3>
+        
+        <form method="POST">
+            <input type="hidden" name="action" value="update_profile">
+            
+            <div class="form-group">
+                <label for="name">Naam</label>
+                <input type="text" id="name" name="name" value="{{ user['name'] }}" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="relationship_start">Relatie Startdatum</label>
+                <input type="date" id="relationship_start" name="relationship_start" 
+                       value="{{ user['relationship_start_date'] or '' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="love_primary">Primaire Love Language</label>
+                <select id="love_primary" name="love_primary">
+                    <option value="">-- Selecteer --</option>
+                    <option value="words" {% if user['love_language_primary'] == 'words' %}selected{% endif %}>Words of Affirmation</option>
+                    <option value="time" {% if user['love_language_primary'] == 'time' %}selected{% endif %}>Quality Time</option>
+                    <option value="gifts" {% if user['love_language_primary'] == 'gifts' %}selected{% endif %}>Receiving Gifts</option>
+                    <option value="acts" {% if user['love_language_primary'] == 'acts' %}selected{% endif %}>Acts of Service</option>
+                    <option value="touch" {% if user['love_language_primary'] == 'touch' %}selected{% endif %}>Physical Touch</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="love_secondary">Secundaire Love Language</label>
+                <select id="love_secondary" name="love_secondary">
+                    <option value="">-- Selecteer --</option>
+                    <option value="words" {% if user['love_language_secondary'] == 'words' %}selected{% endif %}>Words of Affirmation</option>
+                    <option value="time" {% if user['love_language_secondary'] == 'time' %}selected{% endif %}>Quality Time</option>
+                    <option value="gifts" {% if user['love_language_secondary'] == 'gifts' %}selected{% endif %}>Receiving Gifts</option>
+                    <option value="acts" {% if user['love_language_secondary'] == 'acts' %}selected{% endif %}>Acts of Service</option>
+                    <option value="touch" {% if user['love_language_secondary'] == 'touch' %}selected{% endif %}>Physical Touch</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary btn-block">Profiel Bijwerken</button>
+        </form>
+    </div>
+    
+    <!-- Logout -->
+    <div class="card mt-2">
+        <a href="/logout" class="btn btn-danger btn-block">Uitloggen</a>
+    </div>
+</div>
+{% endblock %}

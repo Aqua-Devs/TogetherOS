@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Stats - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>📊 Analytics</h2>
+    
+    <div class="card">
+        <h3>Mood Trend (30 dagen)</h3>
+        <p class="text-secondary">Coming soon: mood chart</p>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Appreciation Stats</h3>
+        <p>Totaal verzonden: {{ analytics['appreciations']['total'] }}</p>
+        <p>Complimenten: {{ analytics['appreciations']['compliments'] }}</p>
+        <p>Dankbaarheid: {{ analytics['appreciations']['gratitude'] }}</p>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Date Nights (90 dagen)</h3>
+        <p>Totaal: {{ analytics['dates']['total'] }}</p>
+        <p>Gemiddelde rating: {{ "%.1f"|format(analytics['dates']['avg_rating'] or 0) }}/5</p>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Conflict Resolution</h3>
+        <p>Totaal: {{ analytics['conflicts']['total'] }}</p>
+        <p>Opgelost: {{ analytics['conflicts']['resolved'] }}</p>
+        {% if analytics['conflicts']['total'] > 0 %}
+        <div class="progress mt-2">
+            <div class="progress-bar" style="width: {{ (analytics['conflicts']['resolved'] / analytics['conflicts']['total'] * 100) }}%"></div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

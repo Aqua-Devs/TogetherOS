@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Calendar - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>📅 Kalender</h2>
+    
+    <div class="card">
+        <h3>Nieuw Event</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+                <label>Titel</label>
+                <input type="text" name="title" required>
+            </div>
+            <div class="form-group">
+                <label>Datum</label>
+                <input type="date" name="date" required>
+            </div>
+            <div class="form-group">
+                <label>Type</label>
+                <select name="type">
+                    <option value="anniversary">💕 Anniversary</option>
+                    <option value="birthday">🎂 Birthday</option>
+                    <option value="date_night">🌹 Date Night</option>
+                    <option value="reminder">⏰ Reminder</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><input type="checkbox" name="recurring"> Jaarlijks herhalen</label>
+            </div>
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea name="notes"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Toevoegen</button>
+        </form>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Events</h3>
+        {% for event in events %}
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
+            <p><strong>{{ event['title'] }}</strong></p>
+            <p class="text-secondary" style="font-size: 0.9rem;">{{ event['date'] }} | {{ event['type'] }}</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

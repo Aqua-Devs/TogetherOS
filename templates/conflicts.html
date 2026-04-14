@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Conflicts - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>🤝 Conflict Log</h2>
+    
+    <div class="card">
+        <h3>Nieuw Conflict Loggen</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+                <label>Onderwerp</label>
+                <input type="text" name="topic" required>
+            </div>
+            <div class="form-group">
+                <label>Severity (1-5)</label>
+                <input type="range" name="severity" min="1" max="5" value="3" required>
+            </div>
+            <div class="form-group">
+                <label>Beschrijving</label>
+                <textarea name="description"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Datum</label>
+                <input type="date" name="date_occurred">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Loggen</button>
+        </form>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Conflict Historie</h3>
+        {% for conflict in conflicts %}
+        <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.75rem; {% if conflict['resolved'] %}border-left: 3px solid var(--success);{% else %}border-left: 3px solid var(--danger);{% endif %}">
+            <p><strong>{{ conflict['topic'] }}</strong> {% if conflict['resolved'] %}✅{% else %}🔴{% endif %}</p>
+            <p class="text-secondary">{{ conflict['date_occurred'] }} | Severity: {{ conflict['severity'] }}/5</p>
+            {% if not conflict['resolved'] %}
+            <form method="POST" class="mt-2">
+                <input type="hidden" name="action" value="resolve">
+                <input type="hidden" name="conflict_id" value="{{ conflict['id'] }}">
+                <textarea name="resolution" placeholder="Hoe opgelost?" required></textarea>
+                <textarea name="lessons" placeholder="Wat geleerd?" class="mt-1"></textarea>
+                <button type="submit" class="btn btn-success mt-1">Markeer als Opgelost</button>
+            </form>
+            {% else %}
+            <p class="mt-2">✅ Opgelost op {{ conflict['resolved_date'] }}</p>
+            <p class="text-secondary">{{ conflict['resolution_notes'] }}</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - TogetherOS{% endblock %}
+
+{% block content %}
+<div class="mt-2">
+    <h2>Hoi {{ user['name'] }}! 👋</h2>
+    
+    {% if not stats['has_partner'] %}
+    <div class="card" style="background: linear-gradient(135deg, rgba(255, 107, 157, 0.2), rgba(192, 108, 132, 0.2)); border-color: var(--primary);">
+        <h3>🔗 Koppel je Partner</h3>
+        <p>Je hebt nog geen partner gekoppeld. Ga naar <a href="/settings" style="color: var(--primary); text-decoration: underline;">instellingen</a> om een invite code te genereren of een code in te voeren.</p>
+    </div>
+    {% endif %}
+    
+    <!-- Main Stats -->
+    <div class="grid grid-2 mt-3">
+        <div class="stat-card">
+            <div class="stat-number">{{ stats['days_together'] }}</div>
+            <div class="stat-label">Dagen Samen</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ stats['checkin_streak'] }}</div>
+            <div class="stat-label">Check-in Streak 🔥</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ stats['date_nights'] }}</div>
+            <div class="stat-label">Date Nights</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-number">{{ stats['appreciations_sent'] }}</div>
+            <div class="stat-label">Appreciations Sent</div>
+        </div>
+    </div>
+    
+    {% if stats['unread_appreciations'] > 0 %}
+    <div class="card mt-3" style="background: linear-gradient(135deg, rgba(0, 217, 163, 0.2), rgba(0, 150, 136, 0.2));">
+        <h3>💕 Nieuwe Appreciations!</h3>
+        <p>Je hebt {{ stats['unread_appreciations'] }} nieuwe appreciation(s) ontvangen!</p>
+        <a href="/appreciations" class="btn btn-success">Bekijk Nu</a>
+    </div>
+    {% endif %}
+    
+    <!-- Bucket List Progress -->
+    {% if stats['bucket_total'] > 0 %}
+    <div class="card mt-2">
+        <h3>🎯 Bucket List Voortgang</h3>
+        <p class="text-secondary">{{ stats['bucket_completed'] }} van {{ stats['bucket_total'] }} voltooid</p>
+        <div class="progress mt-2">
+            <div class="progress-bar" style="width: {{ (stats['bucket_completed'] / stats['bucket_total'] * 100) if stats['bucket_total'] > 0 else 0 }}%"></div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Active Challenges -->
+    {% if stats['active_challenges'] > 0 %}
+    <div class="card mt-2">
+        <h3>🏆 Actieve Challenges</h3>
+        <p>Je hebt {{ stats['active_challenges'] }} actieve challenge(s)!</p>
+        <a href="/challenges" class="btn btn-secondary">Bekijk Challenges</a>
+    </div>
+    {% endif %}
+    
+    <!-- Recent Memories -->
+    {% if stats['recent_memories']|length > 0 %}
+    <div class="card mt-2">
+        <h3>💭 Recente Memories</h3>
+        {% for memory in stats['recent_memories'] %}
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
+            <strong>{{ memory['title'] }}</strong>
+            <p class="text-secondary" style="font-size: 0.9rem; margin-top: 0.25rem;">{{ memory['date'] }}</p>
+        </div>
+        {% endfor %}
+        <a href="/memories" class="btn btn-secondary mt-2">Alle Memories</a>
+    </div>
+    {% endif %}
+    
+    <!-- Upcoming Events -->
+    {% if stats['upcoming_events']|length > 0 %}
+    <div class="card mt-2">
+        <h3>📅 Aankomende Events</h3>
+        {% for event in stats['upcoming_events'] %}
+        <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
+            <strong>{{ event['title'] }}</strong>
+            <p class="text-secondary" style="font-size: 0.9rem; margin-top: 0.25rem;">{{ event['date'] }}</p>
+        </div>
+        {% endfor %}
+        <a href="/calendar" class="btn btn-secondary mt-2">Bekijk Kalender</a>
+    </div>
+    {% endif %}
+    
+    <!-- Quick Actions -->
+    <div class="card mt-2">
+        <h3>⚡ Snelle Acties</h3>
+        <div class="grid grid-2 mt-2">
+            <a href="/checkin" class="btn btn-primary">Daily Check-in</a>
+            <a href="/appreciations" class="btn btn-primary">Stuur Appreciation</a>
+            <a href="/conversations" class="btn btn-secondary">Deep Talk</a>
+            <a href="/bucket-list" class="btn btn-secondary">Bucket List</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

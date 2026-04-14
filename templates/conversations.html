@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Conversations - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>💬 Deep Conversations</h2>
+    
+    <div class="card">
+        <h3>Nieuwe Gesprekken</h3>
+        {% if available|length > 0 %}
+            {% for q in available %}
+            <div style="padding: 0.75rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.5rem;">
+                <p>{{ q['question_text'] }}</p>
+                <a href="/conversations/start/{{ q['id'] }}" class="btn btn-primary mt-1">Start Gesprek</a>
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-secondary">Alle vragen beantwoord! 🎉</p>
+        {% endif %}
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Beantwoorde Gesprekken</h3>
+        {% if answered|length > 0 %}
+            {% for conv in answered %}
+            <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.75rem;">
+                <p><strong>{{ conv['question_text'] }}</strong></p>
+                {% if conv['user1_response'] %}
+                    <p class="mt-2 text-secondary">{{ conv['user1_response'] if conv['user1_id'] == user_id else conv['user2_response'] }}</p>
+                {% endif %}
+                {% if conv['user1_response'] and conv['user2_response'] %}
+                    <a href="/conversations/answer/{{ conv['id'] }}" class="btn btn-secondary mt-2">Bekijk Beide Antwoorden</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+            <p class="text-secondary">Nog geen gesprekken beantwoord.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,24 @@
+{
+  "name": "TogetherOS - Relationship Strengthener",
+  "short_name": "TogetherOS",
+  "description": "Versterk je relatie met daily check-ins, date nights, en meer",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#1a0a2e",
+  "theme_color": "#ff6b9d",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

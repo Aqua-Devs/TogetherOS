@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block title %}Couple Quiz - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>🎯 Couple Quiz</h2>
+    
+    {% if unanswered|length > 0 %}
+    <div class="card">
+        <h3>Beantwoord de Vragen</h3>
+        {% for q in unanswered %}
+        <form method="POST" style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 1rem;">
+            <input type="hidden" name="question_id" value="{{ q['id'] }}">
+            <p><strong>{{ q['question_text'] }}</strong></p>
+            <div class="form-group mt-2">
+                <label>Voor mezelf:</label>
+                <input type="text" name="about_self" required>
+            </div>
+            <div class="form-group">
+                <label>Voor mijn partner:</label>
+                <input type="text" name="about_partner" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Opslaan</button>
+        </form>
+        {% endfor %}
+    </div>
+    {% endif %}
+    
+    <div class="card mt-2">
+        <h3>Resultaten</h3>
+        {% for a in answered %}
+        <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.75rem; border-left: 3px solid {% if a['match'] %}var(--success){% else %}var(--danger){% endif %};">
+            <p><strong>{{ a['question_text'] }}</strong></p>
+            <p class="mt-2"><strong>Jouw antwoord:</strong> {{ a['my_answer'] }}</p>
+            <p><strong>Jouw gok voor partner:</strong> {{ a['my_guess'] }}</p>
+            {% if a['partner_answer'] %}
+            <p><strong>Partner's antwoord:</strong> {{ a['partner_answer'] }}</p>
+            <p class="mt-2 {% if a['match'] %}text-success{% else %}text-danger{% endif %}">
+                {% if a['match'] %}✅ Match!{% else %}❌ Geen match{% endif %}
+            </p>
+            {% else %}
+            <p class="text-secondary mt-2">Partner heeft nog niet geantwoord...</p>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

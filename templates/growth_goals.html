@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Growth Goals - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <h2>🌱 Growth Goals</h2>
+    
+    <div class="card">
+        <h3>Nieuw Groeidoel</h3>
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="form-group">
+                <label>Doel</label>
+                <input type="text" name="goal_text" required>
+            </div>
+            <div class="form-group">
+                <label>Categorie</label>
+                <select name="category">
+                    <option value="communication">💬 Communicatie</option>
+                    <option value="intimacy">❤️ Intimiteit</option>
+                    <option value="fun">🎉 Fun</option>
+                    <option value="health">💪 Gezondheid</option>
+                    <option value="finance">💰 Financieel</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>Target Datum</label>
+                <input type="date" name="target_date">
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Toevoegen</button>
+        </form>
+    </div>
+    
+    <div class="card mt-2">
+        <h3>Doelen</h3>
+        {% for goal in goals %}
+        <div style="padding: 1rem; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 0.75rem; {% if goal['completed'] %}opacity: 0.6;{% endif %}">
+            <p><strong>{{ goal['goal_text'] }}</strong> {% if goal['completed'] %}✅{% endif %}</p>
+            <p class="text-secondary" style="font-size: 0.9rem;">{{ goal['category'] }}{% if goal['target_date'] %} | {{ goal['target_date'] }}{% endif %}</p>
+            {% if goal['progress_notes'] %}
+            <p style="margin-top: 0.5rem; font-size: 0.9rem;">{{ goal['progress_notes'] }}</p>
+            {% endif %}
+            {% if not goal['completed'] %}
+            <div class="mt-2" style="display: flex; gap: 0.5rem;">
+                <form method="POST" style="flex: 1;">
+                    <input type="hidden" name="action" value="update">
+                    <input type="hidden" name="goal_id" value="{{ goal['id'] }}">
+                    <input type="text" name="progress" placeholder="Voortgang..." required>
+                    <button type="submit" class="btn btn-secondary mt-1" style="width: 100%;">Update</button>
+                </form>
+                <form method="POST">
+                    <input type="hidden" name="action" value="complete">
+                    <input type="hidden" name="goal_id" value="{{ goal['id'] }}">
+                    <button type="submit" class="btn btn-success mt-1">✓</button>
+                </form>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

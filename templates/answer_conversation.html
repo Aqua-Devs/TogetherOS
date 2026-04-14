@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Answer Conversation - TogetherOS{% endblock %}
+{% block content %}
+<div class="mt-2">
+    <div class="card">
+        <h3>{{ conv['question_text'] }}</h3>
+        <form method="POST">
+            <div class="form-group">
+                <label>Jouw Antwoord</label>
+                <textarea name="response" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-block">Opslaan</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
