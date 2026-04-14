@@ -500,77 +500,88 @@ def index():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        email = request.form['email'].lower().strip()
-        password = request.form['password']
-        name = request.form['name']
-        invite_code = request.form.get('invite_code', '').strip()
-        
-        conn = get_db()
-        cursor = conn.cursor()
-        
-        # Check if email exists
-        cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
-        if cursor.fetchone():
-            flash('Dit e-mailadres is al geregistreerd.', 'danger')
-            conn.close()
-            return redirect(url_for('register'))
-        
-        # Hash password and create user
-        password_hash = generate_password_hash(password)
-        cursor.execute('''
-            INSERT INTO users (email, password_hash, name)
-            VALUES (?, ?, ?)
-        ''', (email, password_hash, name))
-        user_id = cursor.lastrowid
-        
-        # Handle invite code if provided
-        if invite_code:
-            cursor.execute('''
-                SELECT from_user_id FROM partner_invites 
-                WHERE invite_code = ? AND used = 0
-            ''', (invite_code,))
-            invite = cursor.fetchone()
+        try:
+            email = request.form['email'].lower().strip()
+            password = request.form['password']
+            name = request.form['name']
+            invite_code = request.form.get('invite_code', '').strip()
             
-            if invite:
-                partner_id = invite['from_user_id']
+            conn = get_db()
+            cursor = conn.cursor()
+            
+            # Check if email exists
+            cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
+            if cursor.fetchone():
+                flash('Dit e-mailadres is al geregistreerd.', 'danger')
+                conn.close()
+                return redirect(url_for('register'))
+            
+            # Hash password and create user
+            password_hash = generate_password_hash(password)
+            cursor.execute('''
+                INSERT INTO users (email, password_hash, name)
+                VALUES (?, ?, ?)
+            ''', (email, password_hash, name))
+            user_id = cursor.lastrowid
+            
+            # Handle invite code if provided
+            if invite_code:
+                cursor.execute('''
+                    SELECT from_user_id FROM partner_invites 
+                    WHERE invite_code = ? AND used = 0
+                ''', (invite_code,))
+                invite = cursor.fetchone()
                 
-                # Link both users
-                cursor.execute('UPDATE users SET partner_id = ? WHERE id = ?', (partner_id, user_id))
-                cursor.execute('UPDATE users SET partner_id = ? WHERE id = ?', (user_id, partner_id))
-                cursor.execute('UPDATE partner_invites SET used = 1 WHERE invite_code = ?', (invite_code,))
-                
-                flash(f'Account aangemaakt en gekoppeld aan je partner! 💕', 'success')
+                if invite:
+                    partner_id = invite['from_user_id']
+                    
+                    # Link both users
+                    cursor.execute('UPDATE users SET partner_id = ? WHERE id = ?', (partner_id, user_id))
+                    cursor.execute('UPDATE users SET partner_id = ? WHERE id = ?', (user_id, partner_id))
+                    cursor.execute('UPDATE partner_invites SET used = 1 WHERE invite_code = ?', (invite_code,))
+                    
+                    flash(f'Account aangemaakt en gekoppeld aan je partner! 💕', 'success')
+                else:
+                    flash('Account aangemaakt! Ongeldige invite code - je kunt later een partner koppelen.', 'warning')
             else:
-                flash('Account aangemaakt! Ongeldige invite code - je kunt later een partner koppelen.', 'warning')
-        else:
-            flash('Account aangemaakt! Koppel je partner in de instellingen.', 'success')
+                flash('Account aangemaakt! Koppel je partner in de instellingen.', 'success')
+            
+            conn.commit()
+            conn.close()
+            
+            session['user_id'] = user_id
+            return redirect(url_for('dashboard'))
         
-        conn.commit()
-        conn.close()
-        
-        session['user_id'] = user_id
-        return redirect(url_for('dashboard'))
+        except Exception as e:
+            print(f"Registration error: {e}")
+            flash('Er is iets fout gegaan. Probeer het opnieuw.', 'danger')
+            return redirect(url_for('register'))
     
     return render_template('register.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form['email'].lower().strip()
-        password = request.form['password']
+        try:
+            email = request.form['email'].lower().strip()
+            password = request.form['password']
+            
+            conn = get_db()
+            cursor = conn.cursor()
+            cursor.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,))
+            user = cursor.fetchone()
+            conn.close()
+            
+            if user and check_password_hash(user['password_hash'], password):
+                session['user_id'] = user['id']
+                flash('Welkom terug! ❤️', 'success')
+                return redirect(url_for('dashboard'))
+            
+            flash('Ongeldige inloggegevens.', 'danger')
         
-        conn = get_db()
-        cursor = conn.cursor()
-        cursor.execute('SELECT id, password_hash FROM users WHERE email = ?', (email,))
-        user = cursor.fetchone()
-        conn.close()
-        
-        if user and check_password_hash(user['password_hash'], password):
-            session['user_id'] = user['id']
-            flash('Welkom terug! ❤️', 'success')
-            return redirect(url_for('dashboard'))
-        
-        flash('Ongeldige inloggegevens.', 'danger')
+        except Exception as e:
+            print(f"Login error: {e}")
+            flash('Er is iets fout gegaan. Probeer het opnieuw.', 'danger')
     
     return render_template('login.html')
 
