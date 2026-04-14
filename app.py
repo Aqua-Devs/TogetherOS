@@ -1749,6 +1749,12 @@ def stats():
 
 # ==================== INIT APP ====================
 
-if __name__ == '__main__':
+# Initialize database on startup (works with both gunicorn and direct run)
+try:
     init_db()
+    print("✅ Database initialized successfully!")
+except Exception as e:
+    print(f"⚠️ Database initialization warning: {e}")
+
+if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)
