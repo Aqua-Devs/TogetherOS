@@ -612,115 +612,135 @@ def dashboard():
     conn = get_db()
     cursor = conn.cursor()
     
-    # Get user info
-    cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
-    user = cursor.fetchone()
-    
-    stats = {}
-    
-    # Basic stats
-    stats['has_partner'] = user['partner_id'] is not None
-    
-    if stats['has_partner']:
-        couple_id = get_couple_id(user_id)
+    try:
+        # Get user info
+        cursor.execute('SELECT * FROM users WHERE id = ?', (user_id,))
+        user = cursor.fetchone()
         
-        # Days together
-        if user['relationship_start_date']:
-            start = datetime.strptime(user['relationship_start_date'], '%Y-%m-%d')
-            stats['days_together'] = (datetime.now() - start).days
+        if not user:
+            print(f"❌ User {user_id} not found in database!")
+            conn.close()
+            session.clear()
+            flash('Je account is niet gevonden. Log opnieuw in.', 'danger')
+            return redirect(url_for('login'))
+        
+        print(f"📊 Loading dashboard for user {user_id} ({user['name']})")
+        
+        stats = {}
+        
+        # Basic stats
+        stats['has_partner'] = user['partner_id'] is not None
+        
+        if stats['has_partner']:
+            couple_id = get_couple_id(user_id)
+            print(f"💕 User has partner, couple_id: {couple_id}")
+            
+            # Days together
+            if user['relationship_start_date']:
+                start = datetime.strptime(user['relationship_start_date'], '%Y-%m-%d')
+                stats['days_together'] = (datetime.now() - start).days
+            else:
+                stats['days_together'] = 0
+            
+            # Check-in streak
+            cursor.execute('''
+                SELECT date FROM daily_checkins 
+                WHERE user_id = ? 
+                ORDER BY date DESC
+            ''', (user_id,))
+            checkins = cursor.fetchall()
+            streak = 0
+            if checkins:
+                current_date = datetime.now().date()
+                for checkin in checkins:
+                    checkin_date = datetime.strptime(checkin['date'], '%Y-%m-%d').date()
+                    if checkin_date == current_date or checkin_date == current_date - timedelta(days=streak):
+                        streak += 1
+                        current_date = checkin_date
+                    else:
+                        break
+            stats['checkin_streak'] = streak
+            
+            # Unread appreciations
+            cursor.execute('''
+                SELECT COUNT(*) as count FROM appreciations 
+                WHERE to_user_id = ? AND read = 0
+            ''', (user_id,))
+            stats['unread_appreciations'] = cursor.fetchone()['count']
+            
+            # Total appreciations sent
+            cursor.execute('''
+                SELECT COUNT(*) as count FROM appreciations 
+                WHERE from_user_id = ?
+            ''', (user_id,))
+            stats['appreciations_sent'] = cursor.fetchone()['count']
+            
+            # Date nights count
+            cursor.execute('''
+                SELECT COUNT(*) as count FROM date_nights 
+                WHERE couple_id = ?
+            ''', (couple_id,))
+            stats['date_nights'] = cursor.fetchone()['count']
+            
+            # Bucket list progress
+            cursor.execute('''
+                SELECT 
+                    COUNT(*) as total,
+                    SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed
+                FROM bucket_list WHERE couple_id = ?
+                ''', (couple_id,))
+            bucket = cursor.fetchone()
+            stats['bucket_total'] = bucket['total']
+            stats['bucket_completed'] = bucket['completed'] or 0
+            
+            # Active challenges
+            cursor.execute('''
+                SELECT COUNT(*) as count FROM challenges 
+                WHERE couple_id = ? AND active = 1
+            ''', (couple_id,))
+            stats['active_challenges'] = cursor.fetchone()['count']
+            
+            # Recent memories
+            cursor.execute('''
+                SELECT * FROM memories 
+                WHERE couple_id = ? 
+                ORDER BY created_at DESC LIMIT 3
+            ''', (couple_id,))
+            stats['recent_memories'] = cursor.fetchall()
+            
+            # Upcoming calendar events
+            cursor.execute('''
+                SELECT * FROM calendar_events 
+                WHERE couple_id = ? AND date >= date('now')
+                ORDER BY date ASC LIMIT 3
+            ''', (couple_id,))
+            stats['upcoming_events'] = cursor.fetchall()
+            
         else:
+            print("ℹ️ User has no partner yet")
+            # No partner yet
             stats['days_together'] = 0
+            stats['checkin_streak'] = 0
+            stats['unread_appreciations'] = 0
+            stats['appreciations_sent'] = 0
+            stats['date_nights'] = 0
+            stats['bucket_total'] = 0
+            stats['bucket_completed'] = 0
+            stats['active_challenges'] = 0
+            stats['recent_memories'] = []
+            stats['upcoming_events'] = []
         
-        # Check-in streak
-        cursor.execute('''
-            SELECT date FROM daily_checkins 
-            WHERE user_id = ? 
-            ORDER BY date DESC
-        ''', (user_id,))
-        checkins = cursor.fetchall()
-        streak = 0
-        if checkins:
-            current_date = datetime.now().date()
-            for checkin in checkins:
-                checkin_date = datetime.strptime(checkin['date'], '%Y-%m-%d').date()
-                if checkin_date == current_date or checkin_date == current_date - timedelta(days=streak):
-                    streak += 1
-                    current_date = checkin_date
-                else:
-                    break
-        stats['checkin_streak'] = streak
-        
-        # Unread appreciations
-        cursor.execute('''
-            SELECT COUNT(*) as count FROM appreciations 
-            WHERE to_user_id = ? AND read = 0
-        ''', (user_id,))
-        stats['unread_appreciations'] = cursor.fetchone()['count']
-        
-        # Total appreciations sent
-        cursor.execute('''
-            SELECT COUNT(*) as count FROM appreciations 
-            WHERE from_user_id = ?
-        ''', (user_id,))
-        stats['appreciations_sent'] = cursor.fetchone()['count']
-        
-        # Date nights count
-        cursor.execute('''
-            SELECT COUNT(*) as count FROM date_nights 
-            WHERE couple_id = ?
-        ''', (couple_id,))
-        stats['date_nights'] = cursor.fetchone()['count']
-        
-        # Bucket list progress
-        cursor.execute('''
-            SELECT 
-                COUNT(*) as total,
-                SUM(CASE WHEN completed = 1 THEN 1 ELSE 0 END) as completed
-            FROM bucket_list WHERE couple_id = ?
-        ''', (couple_id,))
-        bucket = cursor.fetchone()
-        stats['bucket_total'] = bucket['total']
-        stats['bucket_completed'] = bucket['completed'] or 0
-        
-        # Active challenges
-        cursor.execute('''
-            SELECT COUNT(*) as count FROM challenges 
-            WHERE couple_id = ? AND active = 1
-        ''', (couple_id,))
-        stats['active_challenges'] = cursor.fetchone()['count']
-        
-        # Recent memories
-        cursor.execute('''
-            SELECT * FROM memories 
-            WHERE couple_id = ? 
-            ORDER BY created_at DESC LIMIT 3
-        ''', (couple_id,))
-        stats['recent_memories'] = cursor.fetchall()
-        
-        # Upcoming calendar events
-        cursor.execute('''
-            SELECT * FROM calendar_events 
-            WHERE couple_id = ? AND date >= date('now')
-            ORDER BY date ASC LIMIT 3
-        ''', (couple_id,))
-        stats['upcoming_events'] = cursor.fetchall()
-        
-    else:
-        # No partner yet
-        stats['days_together'] = 0
-        stats['checkin_streak'] = 0
-        stats['unread_appreciations'] = 0
-        stats['appreciations_sent'] = 0
-        stats['date_nights'] = 0
-        stats['bucket_total'] = 0
-        stats['bucket_completed'] = 0
-        stats['active_challenges'] = 0
-        stats['recent_memories'] = []
-        stats['upcoming_events'] = []
+        conn.close()
+        print(f"✅ Dashboard loaded successfully for {user['name']}")
+        return render_template('dashboard.html', user=user, stats=stats)
     
-    conn.close()
-    
-    return render_template('dashboard.html', user=user, stats=stats)
+    except Exception as e:
+        print(f"❌ Dashboard error: {e}")
+        import traceback
+        traceback.print_exc()
+        conn.close()
+        flash('Er is een fout opgetreden bij het laden van het dashboard.', 'danger')
+        return redirect(url_for('login'))
 
 # ==================== SETTINGS & PARTNER LINKING ====================
 
