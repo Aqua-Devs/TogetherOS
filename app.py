@@ -506,12 +506,15 @@ def register():
             name = request.form['name']
             invite_code = request.form.get('invite_code', '').strip()
             
+            print(f"📝 Registration attempt - Email: {email}, Name: {name}, Invite code: '{invite_code}'")
+            
             conn = get_db()
             cursor = conn.cursor()
             
             # Check if email exists
             cursor.execute('SELECT id FROM users WHERE email = ?', (email,))
             if cursor.fetchone():
+                print(f"❌ Email already exists: {email}")
                 flash('Dit e-mailadres is al geregistreerd.', 'danger')
                 conn.close()
                 return redirect(url_for('register'))
@@ -523,9 +526,11 @@ def register():
                 VALUES (?, ?, ?)
             ''', (email, password_hash, name))
             user_id = cursor.lastrowid
+            print(f"✅ User created - ID: {user_id}")
             
             # Handle invite code if provided
             if invite_code:
+                print(f"🔍 Looking for invite code: '{invite_code}'")
                 cursor.execute('''
                     SELECT from_user_id FROM partner_invites 
                     WHERE invite_code = ? AND used = 0
@@ -534,26 +539,33 @@ def register():
                 
                 if invite:
                     partner_id = invite['from_user_id']
+                    print(f"💕 Match found! Linking user {user_id} with partner {partner_id}")
                     
                     # Link both users
                     cursor.execute('UPDATE users SET partner_id = ? WHERE id = ?', (partner_id, user_id))
                     cursor.execute('UPDATE users SET partner_id = ? WHERE id = ?', (user_id, partner_id))
                     cursor.execute('UPDATE partner_invites SET used = 1 WHERE invite_code = ?', (invite_code,))
                     
-                    flash(f'Account aangemaakt en gekoppeld aan je partner! 💕', 'success')
+                    flash(f'🎉 Account aangemaakt en gekoppeld aan je partner!', 'success')
+                    print(f"✅ Partner linking successful!")
                 else:
-                    flash('Account aangemaakt! Ongeldige invite code - je kunt later een partner koppelen.', 'warning')
+                    print(f"❌ Invite code not found or already used: '{invite_code}'")
+                    flash(f'⚠️ Invite code "{invite_code}" is ongeldig of al gebruikt. Account is wel aangemaakt!', 'warning')
             else:
-                flash('Account aangemaakt! Koppel je partner in de instellingen.', 'success')
+                print("ℹ️ No invite code provided")
+                flash('✅ Account aangemaakt! Ga naar Settings om je partner te koppelen.', 'success')
             
             conn.commit()
             conn.close()
             
             session['user_id'] = user_id
+            print(f"✅ Session set for user {user_id}, redirecting to dashboard")
             return redirect(url_for('dashboard'))
         
         except Exception as e:
-            print(f"Registration error: {e}")
+            print(f"❌ Registration error: {e}")
+            import traceback
+            traceback.print_exc()
             flash('Er is iets fout gegaan. Probeer het opnieuw.', 'danger')
             return redirect(url_for('register'))
     
