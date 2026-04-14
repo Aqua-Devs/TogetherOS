@@ -10,7 +10,8 @@ import base64
 app = Flask(__name__)
 app.secret_key = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 
-DATABASE = 'togetheros.db'
+# Use /tmp for database on Render (writable directory)
+DATABASE = os.environ.get('DATABASE_PATH', '/tmp/togetheros.db')
 
 # ==================== DATABASE SETUP ====================
 

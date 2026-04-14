@@ -1,0 +1,59 @@
+# TOGETHEROS - FIX & DEPLOY SCRIPT
+# Kopieer en plak deze commands één voor één in je terminal/cmd
+
+# ============================================
+# WINDOWS USERS: Gebruik deze commands
+# ============================================
+
+# 1. Download de nieuwe app.py
+# Download het bestand hieronder en vervang je huidige app.py
+
+# 2. Ga naar je togetheros folder
+cd C:\Users\JOUW_NAAM\Downloads\togetheros
+# ^^ Pas dit aan naar waar jouw folder staat!
+
+# 3. Check wat er veranderd is
+git status
+
+# 4. Add de wijzigingen
+git add app.py
+
+# 5. Commit met beschrijving
+git commit -m "Fix database path for Render deployment"
+
+# 6. Push naar GitHub
+git push origin main
+
+# ============================================
+# Klaar! Render deploy automatisch binnen 2-3 min
+# ============================================
+
+# Check deploy status:
+# https://dashboard.render.com → je service → "Events" tab
+
+# ============================================
+# MAC/LINUX USERS: Gebruik deze commands
+# ============================================
+
+# 1. Download de nieuwe app.py
+# Download het bestand hieronder en vervang je huidige app.py
+
+# 2. Ga naar je togetheros folder
+cd ~/Downloads/togetheros
+# ^^ Pas dit aan naar waar jouw folder staat!
+
+# 3. Check wat er veranderd is
+git status
+
+# 4. Add de wijzigingen
+git add app.py
+
+# 5. Commit met beschrijving
+git commit -m "Fix database path for Render deployment"
+
+# 6. Push naar GitHub
+git push origin main
+
+# ============================================
+# Klaar! Render deploy automatisch binnen 2-3 min
+# ============================================
